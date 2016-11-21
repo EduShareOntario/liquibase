@@ -23,6 +23,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+    private boolean convertToNativeSql;
     private String endDelimiter;
     private String sql;
     private String dbms;
@@ -33,6 +34,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     protected AbstractSQLChange() {
         setStripComments(null);
         setSplitStatements(null);
+        setConvertToNativeSql(null);
     }
 
     public InputStream openSqlStream() throws IOException {
@@ -118,6 +120,28 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             this.splitStatements = true;
         } else {
             this.splitStatements = splitStatements;
+        }
+    }
+
+    /**
+     * Return if the SQL should be converted to native SQL.
+     * <p></p>
+     * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
+     */
+    @DatabaseChangeProperty(description = "Set to false to not have liquibase convert the statements to native SQL. Defaults to true if not set")
+    public Boolean isConvertToNativeSql() {
+        return convertToNativeSql;
+    }
+
+    /**
+     * Set whether SQL should be converted to native SQL.
+     * Passing null sets stripComments to the default value (true).
+     */
+    public void setConvertToNativeSql(Boolean convertToNativeSql) {
+        if (convertToNativeSql == null) {
+            this.convertToNativeSql = true;
+        } else {
+            this.convertToNativeSql = convertToNativeSql;
         }
     }
 
@@ -213,13 +237,15 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
              }
 
             String escapedStatement = statement;
-            try {
-                if (database.getConnection() != null) {
-                    escapedStatement = database.getConnection().nativeSQL(statement);
+            if (isConvertToNativeSql()) {
+                try {
+                    if (database.getConnection() != null) {
+                        escapedStatement = database.getConnection().nativeSQL(statement);
+                    }
+                } catch (DatabaseException e) {
+                    escapedStatement = statement;
                 }
-            } catch (DatabaseException e) {
-				escapedStatement = statement;
-			}
+            }
 
             returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
         }

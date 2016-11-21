@@ -233,7 +233,7 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void generateStatements_willCallNativeSqlIfPossible() throws DatabaseException {
+    public void generateStatements_willCallNativeSqlIfEnabledAndPossible() throws DatabaseException {
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
 
         Database database = mock(Database.class);
@@ -248,6 +248,21 @@ public class AbstractSQLChangeTest {
         //If there is an error, it falls back to passed SQL
         when(connection.nativeSQL("SOME SQL")).thenThrow(new DatabaseException("Testing exception"));
         statements = change.generateStatements(database);
+        assertEquals(1, statements.length);
+        assertEquals("SOME SQL", ((RawSqlStatement) statements[0]).getSql());
+    }
+
+    @Test
+    public void generateStatements_willNotCallNativeSqlIfDisabled() throws DatabaseException {
+        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
+        change.setConvertToNativeSql(false);
+
+        Database database = mock(Database.class);
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        when(database.getConnection()).thenReturn(connection);
+        when(connection.nativeSQL("SOME SQL")).thenReturn("SOME NATIVE SQL");
+
+        SqlStatement[] statements = change.generateStatements(database);
         assertEquals(1, statements.length);
         assertEquals("SOME SQL", ((RawSqlStatement) statements[0]).getSql());
     }

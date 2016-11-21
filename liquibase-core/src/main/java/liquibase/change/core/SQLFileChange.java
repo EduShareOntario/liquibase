@@ -40,6 +40,12 @@ public class SQLFileChange extends AbstractSQLChange {
     private String path;
     private Boolean relativeToChangelogFile;
 
+    public SQLFileChange() {
+        setStripComments(null);
+        setSplitStatements(null);
+        setConvertToNativeSql(false);
+    }
+
     @Override
     public boolean generateStatementsVolatile(Database database) {
         return false;

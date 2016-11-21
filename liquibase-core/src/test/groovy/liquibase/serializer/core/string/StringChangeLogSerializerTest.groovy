@@ -226,6 +226,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
+                "    convertToNativeSql=\"false\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n]"
 
@@ -234,6 +235,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
+                "    convertToNativeSql=\"false\"\n" +
                 "    path=\"PATH/TO/File.txt\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n" +
@@ -246,6 +248,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    convertToNativeSql=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n]"
 
@@ -253,6 +256,7 @@ public class StringChangeLogSerializerTest extends Specification {
         change.setSql("some SQL Here");
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    convertToNativeSql=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    sql=\"some SQL Here\"\n" +
                 "    stripComments=\"false\"\n" +
